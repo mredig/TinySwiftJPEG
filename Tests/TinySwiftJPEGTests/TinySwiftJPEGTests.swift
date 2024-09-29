@@ -75,7 +75,6 @@ private typealias Point = (x: Int, y: Int)
 @Test func testNonNormalStride() async throws {
 	let imageDimensions = (x: 1275, y: 800)
 	let imageRowStride = 1280 * 4
-	let imageSize = imageDimensions.x * imageDimensions.y
 
 	func offset(for point: Point, channelCount: Int) -> Int {
 		(point.y * imageRowStride) + point.x * channelCount
