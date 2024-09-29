@@ -36,12 +36,14 @@ public enum TinySwiftJPEG: Sendable {
 	/// All other arguments should be relatively self explanatory. Returns a jpeg blob in `Data`.
 	public static func encodeJPEG(
 		from data: Data,
+		rowStride: Int?,
 		width: Int,
 		height: Int,
 		channels: Channels,
 		quality: Quality = .good
 	) throws(Error) -> Data {
 		let context = Context()
+		let rowStride = rowStride ?? (width * Int(channels.rawValue))
 		let result = data.withUnsafeBytes { buffer in
 			let inputPointer = buffer.bindMemory(to: UInt8.self).baseAddress
 			return tje_encode_with_func(
@@ -59,6 +61,7 @@ public enum TinySwiftJPEG: Sendable {
 				},
 				context.pointer,
 				quality.rawValue,
+				Int32(rowStride),
 				Int32(width),
 				Int32(height),
 				channels.rawValue,

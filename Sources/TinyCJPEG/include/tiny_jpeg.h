@@ -112,7 +112,8 @@ extern "C"
 //      0 on error. 1 on success.
 
 int tje_encode_to_file(const char* dest_path,
-                       const int width,
+					   const int rowStride,
+					   const int width,
                        const int height,
                        const int num_components,
                        const unsigned char* src_data);
@@ -136,7 +137,8 @@ int tje_encode_to_file(const char* dest_path,
 
 int tje_encode_to_file_at_quality(const char* dest_path,
                                   const int quality,
-                                  const int width,
+								  const int rowStride,
+								  const int width,
                                   const int height,
                                   const int num_components,
                                   const unsigned char* src_data);
@@ -154,7 +156,8 @@ typedef void tje_write_func(void* context, void* data, int size);
 int tje_encode_with_func(tje_write_func* func,
                          void* context,
                          const int quality,
-                         const int width,
+						 const int rowStride,
+						 const int width,
                          const int height,
                          const int num_components,
                          const unsigned char* src_data);
@@ -947,6 +950,7 @@ static void tjei_huff_expand(TJEState* state)
 
 static int tjei_encode_main(TJEState* state,
                             const unsigned char* src_data,
+							const int rowStride,
                             const int width,
                             const int height,
                             const int src_num_components)
@@ -1098,7 +1102,7 @@ static int tjei_encode_main(TJEState* state,
                 for ( int off_x = 0; off_x < 8; ++off_x ) {
                     int block_index = (off_y * 8 + off_x);
 
-                    int src_index = (((y + off_y) * width) + (x + off_x)) * src_num_components;
+					int src_index = (y + off_y) * rowStride + (x + off_x) * src_num_components;
 
                     int col = x + off_x;
                     int row = y + off_y;
@@ -1109,7 +1113,7 @@ static int tjei_encode_main(TJEState* state,
                     if(col >= width) {
                         src_index -= (col - width + 1) * src_num_components;
                     }
-                    assert(src_index < width * height * src_num_components);
+					assert(src_index < rowStride * height * src_num_components);
 
                     uint8_t r = src_data[src_index + 0];
                     uint8_t g = src_data[src_index + 1];
@@ -1175,12 +1179,13 @@ static int tjei_encode_main(TJEState* state,
 }
 
 int tje_encode_to_file(const char* dest_path,
-                       const int width,
+					   const int rowStride,
+					   const int width,
                        const int height,
                        const int num_components,
                        const unsigned char* src_data)
 {
-    int res = tje_encode_to_file_at_quality(dest_path, 3, width, height, num_components, src_data);
+	int res = tje_encode_to_file_at_quality(dest_path, 3, rowStride, width, height, num_components, src_data);
     return res;
 }
 
@@ -1193,7 +1198,8 @@ static void tjei_stdlib_func(void* context, void* data, int size)
 // Define public interface.
 int tje_encode_to_file_at_quality(const char* dest_path,
                                   const int quality,
-                                  const int width,
+								  const int rowStride,
+								  const int width,
                                   const int height,
                                   const int num_components,
                                   const unsigned char* src_data)
@@ -1205,7 +1211,7 @@ int tje_encode_to_file_at_quality(const char* dest_path,
     }
 
     int result = tje_encode_with_func(tjei_stdlib_func, fd,
-                                      quality, width, height, num_components, src_data);
+									  quality, rowStride, width, height, num_components, src_data);
 
     result |= 0 == fclose(fd);
 
@@ -1215,6 +1221,7 @@ int tje_encode_to_file_at_quality(const char* dest_path,
 int tje_encode_with_func(tje_write_func* func,
                          void* context,
                          const int quality,
+						 const int rowStride,
                          const int width,
                          const int height,
                          const int num_components,
@@ -1265,7 +1272,7 @@ int tje_encode_with_func(tje_write_func* func,
 
     tjei_huff_expand(&state);
 
-    int result = tjei_encode_main(&state, src_data, width, height, num_components);
+	int result = tjei_encode_main(&state, src_data, rowStride, width, height, num_components);
 
     return result;
 }
