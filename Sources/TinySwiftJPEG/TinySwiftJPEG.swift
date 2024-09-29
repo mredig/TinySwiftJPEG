@@ -31,6 +31,9 @@ public enum TinySwiftJPEG: Sendable {
 		}
 	}
 
+	/// Encodes raw image data to jpeg, leveraging the [tinyjpeg](https://github.com/serge-rgb/TinyJPEG) library.
+	/// `data` must be encoded in 3 bytes interleaved RGB or 4 bytes interleaved RGBA (in that channel order) data.
+	/// All other arguments should be relatively self explanatory. Returns a jpeg blob in `Data`.
 	public static func encodeJPEG(
 		from data: Data,
 		width: Int,
