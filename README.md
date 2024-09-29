@@ -45,4 +45,6 @@ try jpeg.write(to: URL(filePath: "/path/to/output.jpg")
 ```
 
 I made a small modification to the TinyJPEG library to allow for a different count of bytes per row
-than simply just `width * channelCount` (channel count being either 3 or 4, depending on alpha).
+than simply just `width * channelCount` (channel count being either 3 or 4, depending on alpha) as
+that's a very common situation in CoreGraphics (and probably elsewhere). That should save us an
+unecessary byte copy!
